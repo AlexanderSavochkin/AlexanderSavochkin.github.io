@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="I write about a variety of topics, primarily focusing on programming, embedded systems, do-it-yourself (DIY) projects, robotics, and machine learning (ML).">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alex Savochkin</title>
+<link href="assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="rss.xml">
+<link rel="canonical" href="https://alexandersavochkin.github.io/">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/" type="text/html">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Header and menu bar -->
+<div class="container">
+      <header class="blog-header py-3"><div class="row nbb-header align-items-center">
+          <div class="col-md-3 col-xs-2 col-sm-2" style="width: auto;">
+            <button class="navbar-toggler navbar-light bg-light nbb-navbar-toggler" type="button" data-toggle="collapse" data-target=".bs-nav-collapsible" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse bs-nav-collapsible bootblog4-search-form-holder">
+                
+            </div>
+        </div>
+          <div class="col-md-6 col-xs-10 col-sm-10 bootblog4-brand" style="width: auto;">
+            <a class="navbar-brand blog-header-logo text-dark" href=".">
+
+            <span id="blog-title">Alex Savochkin</span>
+        </a>
+          </div>
+            <div class="col-md-3 justify-content-end align-items-center bs-nav-collapsible collapse flex-collapse bootblog4-right-nav">
+            <nav class="navbar navbar-light bg-white"><ul class="navbar-nav bootblog4-right-nav"></ul></nav>
+</div>
+    </div>
+</header><nav class="navbar navbar-expand-md navbar-light bg-white static-top"><div class="collapse navbar-collapse bs-nav-collapsible" id="bs-navbar">
+            <ul class="navbar-nav nav-fill d-flex w-100">
+<li class="nav-item">
+<a href="archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+</div>
+<!-- /.navbar-collapse -->
+</nav>
+</div>
+
+<div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+    
+        
+
+    
+        
+    <div class="postindex">
+            <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/" class="u-url">Unveiling the Resolver Enigma. Using black box method for understanding resolver and decoding shaft position. Part 1</a></h1>
+                <div class="metadata">
+                    <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                        Alex Savochkin
+                    </span></p>
+            <p class="dateline">
+            <a href="posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/" rel="bookmark">
+            <time class="published dt-published" datetime="2023-05-23T13:27:39-07:00" itemprop="datePublished" title="2023-05-23 13:27">2023-05-23 13:27</time></a>
+            </p>
+                        <p class="commentline">
+    
+
+
+                </p>
+</div>
+            </header><div class="e-content entry-content">
+                    <p>Resolver is a type of rotary transformer which is used for measuring
+rotation angle of a shaft.  Resolvers give analog output in form of
+phase shift between sinusoidal signals, so the output signal must
+be converted into digital form if we want to use them with digital
+control systems.</p>
+<p>In most modern applications another type of sensor, encoders, are usual
+"go to" solution for measuring shaft position and velocity: they are inherently
+digital which makes it easy to integrate them in modern control
+systems, they have higher accuracy and precision then resolvers
+and they can cost fraction of equivalent resolver.</p>
+<p>Nevertheless resolvers are still applicable: they can operate
+in harsh environments such as extreme temperatures, shock/vibration
+and ionizing radiation. Resolvers has been around for
+longer time so they can be found in old equipment.</p>
+<p>Although resolver-to-digital converter ICs exist, we will rely
+on a sound card and programmatic approach in order to read the shaft
+angle from a resolver and will have some fun along the way.
+In Part 1 we will use a personal computer sound card along with
+a bunch of simple tools for understending the pinout, generating
+required exitation signals, reading the output and write the code
+which will extract shaft angle from the output  signal using PortAdio,
+a popular C library for audio.</p>
+<p>To begin I purchased a resolver with the labeling "JQH-11-AGS-4/A386" on eBay.</p>
+<img alt="/images/jqh-11-agc4-a386.jpg" src="images/jqh-11-agc4-a386.jpg" style="width: 378.0px; height: 504.0px;"><p>Quick internet search didn't give me any datasheets or documentation,
+so let's try blackbox approach. The labeling on the encoder says:
+<strong>ROTOR 2 PHASE 9.75 VOLTS</strong> and <strong>STATOR 2 PHASE 10.1 VOLTS</strong>,
+so most probably we have two windings at <span class="math">\(90^\circ\)</span> on the stator
+at and two windings at <span class="math">\(90^\circ\)</span> on the rotor. What we need to do is
+to provide reference <span class="math">\(\sin\left(\omega t\right)\)</span> and
+<span class="math">\(\cos\left(\omega t\right)\)</span> signals to the stator and read
+<span class="math">\(\sin\left(\omega t + \alpha\right)\)</span> and
+<span class="math">\(\cos\left(\omega t + \alpha\right)\)</span> output signals from
+the rotor, where <span class="math">\(\alpha\)</span> is the shaft rotation angle,
+<span class="math">\(\omega = 2\pi f\)</span>, where frequency <span class="math">\(f\)</span> is 400Hz (which
+is also labeled on the encoder).</p>
+<p>The resolver has two bundles of wires coming out of it. Most probably
+one of the bundles corresponds to rotor windings, and another goes to the stator inside.
+What puzzles me though is that one of the bundles have 4 wires and another bundle has 8.
+The 4-wires bundle has red, black, yellow and blue wires, the
+8-wires bundle has red, yellow, white, blue, green, purple, brown and orange
+wires. It turns out that there are color standards for the resolver wires,
+although 8-wires bundle colors don't match any color code scheme I could find.</p>
+<p>The first thing we can do is to measure resistance between different
+pair of wires, so we can find wires corresponding to the individual windings.
+It would be interesting to find out which windings are on the rotor and which
+are on the stator. In order to check this I decided to bring permanent magnets to
+the resolver and spin the shaft. In this case the windings on the rotor will
+work as alternator winding and generate alternating voltage on the
+wires corresponding to the rotor, while stator's wires shouldn't have any voltage.</p>
+<p>I used Dremel tool and two neodym magnets for this test</p>
+<div class="vimeo-video">
+<iframe src="https://player.vimeo.com/video/832031071" width="640" height="480" frameborder="0" webkitallowfullscreen="webkitAllowFullScreen" mozallowfullscreen="mozallowfullscreen" allowfullscreen="allowFullScreen">
+</iframe>
+</div>
+<p>Here are the results:</p>
+<section id="wire-bundle"><h2>4-wire bundle</h2>
+<table>
+<thead><tr>
+<th class="head"><p>Wire Pair</p></th>
+<th class="head"><p>Generates voltage when shaft spins</p></th>
+<th class="head"><p>Resistance (Ohm)</p></th>
+</tr></thead>
+<tbody>
+<tr>
+<td><p>Red-Black</p></td>
+<td><p>Yes</p></td>
+<td><p>315</p></td>
+</tr>
+<tr>
+<td><p>Yellow-Blue</p></td>
+<td><p>Yes</p></td>
+<td><p>319</p></td>
+</tr>
+</tbody>
+</table></section><section id="wire-bundle-1"><h2>8-wire bundle</h2>
+<table>
+<thead><tr>
+<th class="head"><p>Wire Pair</p></th>
+<th class="head"><p>Generates voltage when shaft spins</p></th>
+<th class="head"><p>Resistance (Ohm)</p></th>
+</tr></thead>
+<tbody>
+<tr>
+<td><p>Red-Yellow</p></td>
+<td><p>No</p></td>
+<td><p>313</p></td>
+</tr>
+<tr>
+<td><p>White-Blue</p></td>
+<td><p>No</p></td>
+<td><p>472</p></td>
+</tr>
+<tr>
+<td><p>Green-Purple</p></td>
+<td><p>No</p></td>
+<td><p>313</p></td>
+</tr>
+<tr>
+<td><p>Brown-Orange</p></td>
+<td><p>No</p></td>
+<td><p>471</p></td>
+</tr>
+</tbody>
+</table>
+<p>Once we figure out which wire corresponds to which winding we can come up with
+a wiring scheme: we will feed the stator winding with two signals having <span class="math">\(90^\circ\)</span>
+phase shift between them, so the winding will generate rotating magnetic field inside
+the resolver. The rotor winding will generate sinusoidal voltage which will have phase
+shift relative to the stator's voltage. The phase shift will correspond to the shaft
+angle <span class="math">\(\phi\)</span>.</p>
+<p>We will use left and right audio channels of the sound card to generate two
+<span class="math">\(90^\circ\)</span> shifted reference signals. We will use two channels of the LINE IN:
+one channel will be used to read the reference signal and another channel will be used
+to read the output signal from one of the rotating winding. So will use the following wiring scheme:</p>
+<img alt="/images/wiring-diagram.png" src="images/wiring-diagram.png" style="width: 675.0px; height: 675.0px;"><p>Having both reference and output signals helps us to compensate for the unkown
+phase shift introduced by the sound card circuitry.</p>
+<p>Here is video of the test run of the setup:</p>
+<div class="youtube-video">
+<iframe width="640" height="480" src="https://www.youtube-nocookie.com/embed/gtvyF6dDCQM?rel=0&amp;wmode=transparent" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
+</div>
+<p>In order to measure the shaft angle we convolve the output signal from rotor
+with the reference signals:</p>
+<div class="math">
+\begin{equation*}
+A = \int_{-\frac{\pi}{\omega}}^{\frac{\pi}{\omega}} U_0 \sin(\omega t + \phi) \sin(\omega t ) dx
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+B = \int_{-\frac{\pi}{\omega}}^{\frac{\pi}{\omega}} U_0 \sin(\omega t + \phi) \cos(\omega t ) dx
+\end{equation*}
+</div>
+<p>Using</p>
+<div class="math">
+\begin{equation*}
+\sin(\omega t + \phi) = \sin(\omega t) \cos(\phi) + \cos(\omega t) sin(\phi),
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+\int_{-\frac{\pi}{\omega}}^{\frac{\pi}{\omega}} U_0 \sin(\omega t) \cos(\omega t ) dx = 0
+\end{equation*}
+</div>
+<p>and</p>
+<div class="math">
+\begin{equation*}
+\int_{-\frac{\pi}{\omega}}^{\frac{\pi}{\omega}} U_0 \sin(\omega t) \sin(\omega t ) dx = \int_{-\frac{\pi}{\omega}}^{\frac{\pi}{\omega}} U_0 \cos(\omega t) \cos(\omega t ) dx = \pi
+\end{equation*}
+</div>
+<p>we can obtain the following relationships between <span class="math">\(A, B\)</span> and <span class="math">\(\phi\)</span>:</p>
+<div class="math">
+\begin{equation*}
+A = \pi U_0 \cos(\phi)
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+B = \pi U_0 \sin(\phi)
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+\phi = \arctan \frac{B}{A}
+\end{equation*}
+</div>
+<p>Since we are creating a software implementation, we operate in discrete time
+domain, so we use the discrete counterparts of the formulas above:</p>
+<div class="math">
+\begin{equation*}
+A = \sum_{n=0}^{N} U_0 \sin(\omega n + \phi) \sin(\omega n )
+\end{equation*}
+</div>
+<div class="math">
+\begin{equation*}
+B = \sum_{n=0}^{N} U_0 \sin(\omega n + \phi) \cos(\omega n )
+\end{equation*}
+</div>
+<p>This computation is peformed for both reference and output signals, so we get reference
+angled <span class="math">\(\phi_{ref}\)</span> and output angle <span class="math">\(\phi_{out}\)</span>. The shaft angle is then <span class="math">\(\phi = \phi_{out} - \phi_{ref}\)</span>.</p>
+<p>It is easier if each period corresponds to exact number of samples, so we adjust the frequency slightly: we will
+use 400.909Hz instead of 400Hz. This way we will have 110 samples per period at 44100 samples per second.
+<span class="math">\(N\)</span> is the number of samples in the signal, must be exact multiple of period.</p>
+<p>The source code available on <a class="reference external" href="https://github.com/AlexanderSavochkin/synchroresolver">GitHub:</a>.</p>
+<p>Here is the video of the final test run:</p>
+<div class="youtube-video">
+<iframe width="640" height="480" src="https://www.youtube-nocookie.com/embed/mcpFu2o8uq0?rel=0&amp;wmode=transparent" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
+</div></section>
+</div>
+            </article>
+</div>
+    
+
+    
+    
+
+
+    
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+ MathJax.Hub.Config({
+     tex2jax: {
+         inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+         displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+         processEscapes: true
+     },
+     displayAlign: 'center', // Change this to 'left' if you want left-aligned equations.
+     "HTML-CSS": {
+         styles: {'.MathJax_Display': {"margin": 0}}
+     }
+ });
+ </script><!--End of body content--><footer id="footer">
+            Contents © 2023         <a href="mailto:alexandr.savochkin@gmail.com">Alex Savochkin</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>
