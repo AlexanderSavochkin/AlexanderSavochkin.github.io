@@ -1157,7 +1157,3 @@ article .metadata {
     }
 }
 
-/* Add gridlines to tables not of class .codehilitetable/.linenos/.code */
-table:not(.codehilitetable) { border-collapse: collapse; border: 1px solid black; }
-th { background-color: lightgrey; }
-td:not(.linenos):not(.code), th { border: solid grey 1px; padding: 5px; }
