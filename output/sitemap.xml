@@ -7,7 +7,7 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <url>
   <loc>https://alexandersavochkin.github.io/</loc>
-  <lastmod>2023-05-23T21:27:00Z</lastmod>
+  <lastmod>2023-12-06T02:48:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/2023/</loc>
@@ -15,11 +15,27 @@
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/archive.html</loc>
-  <lastmod>2023-12-05T19:06:00Z</lastmod>
+  <lastmod>2023-12-13T23:18:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/</loc>
-  <lastmod>2023-05-23T21:27:00Z</lastmod>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/analog/</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/dsp/</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/resolver/</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/robotics/</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/galleries/</loc>
@@ -28,6 +44,10 @@
  <url>
   <loc>https://alexandersavochkin.github.io/listings/</loc>
   <lastmod>2023-05-23T21:27:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/pages/about/</loc>
+  <lastmod>2023-12-06T02:48:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/</loc>

@@ -1,8 +1,8 @@
 <!--
 .. title: Unveiling the Resolver Enigma. Using black box method for understanding resolver and decoding shaft position. Part 1
 .. slug: unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1
-.. date: 2023-05-23 13:27:39 UTC-07:00
-.. tags: 
+.. date: 2023-12-05 13:27:39 UTC-07:00
+.. tags: robotics, analog, dsp, resolver
 .. category: 
 .. link: 
 .. description: 

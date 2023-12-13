@@ -6,15 +6,31 @@
     xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/analog.xml</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/dsp.xml</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/resolver.xml</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/robotics.xml</loc>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
   <loc>https://alexandersavochkin.github.io/galleries/rss.xml</loc>
-  <lastmod>2023-12-05T19:06:00Z</lastmod>
+  <lastmod>2023-12-13T23:18:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/rss.xml</loc>
-  <lastmod>2023-12-05T18:53:00Z</lastmod>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/sitemap.xml</loc>
-  <lastmod>2023-12-05T19:06:00Z</lastmod>
+  <lastmod>2023-12-13T23:20:00Z</lastmod>
  </sitemap>
 </sitemapindex>
