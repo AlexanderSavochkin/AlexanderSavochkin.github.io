@@ -10,8 +10,8 @@
 .. has_math: true
 -->
 
-Resolver is a type of rotary transformer which is used for measuring 
-rotation angle of a shaft.  Resolvers give analog output in form of 
+Resolver are rotary transformers used for measuring 
+rotation angle of a shaft. Resolvers give analog output in form of 
 phase shift between sinusoidal signals, so the output signal must 
 be converted into digital form if we want to use them with digital
 control systems.

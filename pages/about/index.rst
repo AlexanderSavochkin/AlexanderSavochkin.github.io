@@ -7,6 +7,13 @@
 .. description: 
 .. type: text
 
+.. image :: /images/self-portrait.jpg
+   :height: 1080
+   :width: 1440
+   :scale: 50
+
+Alex Savochkin
+
 `Twitter: @alexandr_savo <https://twitter.com/@alexandr_savo>`_
 
 `GitHub: <https://github.com/AlexanderSavochkin>`_
