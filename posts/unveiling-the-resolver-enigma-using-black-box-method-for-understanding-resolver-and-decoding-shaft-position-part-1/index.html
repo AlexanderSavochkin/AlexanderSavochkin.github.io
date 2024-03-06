@@ -11,13 +11,14 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
 <link rel="canonical" href="https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Alex Savochkin">
+<link rel="next" href="../fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/" title="FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability. Part 1" type="text/html">
 <meta property="og:site_name" content="Alex Savochkin">
 <meta property="og:title" content="Unveiling the Resolver Enigma. Using black box method for understandin">
 <meta property="og:url" content="https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/">
-<meta property="og:description" content="Resolver are rotary transformers used for measuring
+<meta property="og:description" content="Resolvers are rotary transformers used for measuring
 rotation angle of a shaft. Resolvers give analog output in form of
 phase shift between sinusoidal signals, so the output signal must
-be converted in">
+be converted i">
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="2023-12-05T13:27:39-07:00">
 <meta property="article:tag" content="analog">
@@ -103,33 +104,33 @@ be converted in">
         
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
-    <p>Resolver are rotary transformers used for measuring
+    <p>Resolvers are rotary transformers used for measuring
 rotation angle of a shaft. Resolvers give analog output in form of
 phase shift between sinusoidal signals, so the output signal must
 be converted into digital form if we want to use them with digital
 control systems.</p>
-<p>In most modern applications another type of sensor, encoders, are usual
-"go to" solution for measuring shaft position and velocity: they are inherently
+<p>In most modern applications another type of sensor, encoders, is the usual
+"go-to" solution for measuring shaft position and velocity: they are inherently
 digital which makes it easy to integrate them in modern control
 systems, they have higher accuracy and precision then resolvers
 and they can cost fraction of equivalent resolver.</p>
-<p>Nevertheless resolvers are still applicable: they can operate
+<p>Nevertheless resolvers are still applicable. They can operate
 in harsh environments such as extreme temperatures, shock/vibration
-and ionizing radiation. Resolvers has been around for
+and ionizing radiation. Resolvers have been around for
 longer time so they can be found in old equipment.</p>
 <p>Although resolver-to-digital converter ICs exist, we will rely
-on a sound card and programmatic approach in order to read the shaft
+on a sound card and a programmatic approach in order to read the shaft
 angle from a resolver and will have some fun along the way.
-In Part 1 we will use a personal computer sound card along with
+In Part 1, we will use a personal computer sound card along with
 a bunch of simple tools for understending the pinout, generating
 required exitation signals, reading the output and write the code
 which will extract shaft angle from the output  signal using PortAdio,
 a popular C library for audio.</p>
 <p>To begin I purchased a resolver with the labeling "JQH-11-AGS-4/A386" on eBay.</p>
-<img alt="/images/jqh-11-agc4-a386.jpg" src="../../images/jqh-11-agc4-a386.jpg" style="width: 378.0px; height: 504.0px;"><p>Quick internet search didn't give me any datasheets or documentation,
+<img alt="/images/jqh-11-agc4-a386.jpg" src="../../images/jqh-11-agc4-a386.jpg" style="width: 378.0px; height: 504.0px;"><p>A quick internet search didn't yeild any datasheets or documentation,
 so let's try blackbox approach. The labeling on the encoder says:
-<strong>ROTOR 2 PHASE 9.75 VOLTS</strong> and <strong>STATOR 2 PHASE 10.1 VOLTS</strong>,
-so most probably we have two windings at <span class="math">\(90^\circ\)</span> on the stator
+<strong>ROTOR 2 PHASE 9.75 VOLTS</strong> and <strong>STATOR 2 PHASE 10.1 VOLTS</strong>.
+Most probably, we have two windings at <span class="math">\(90^\circ\)</span> on the stator
 at and two windings at <span class="math">\(90^\circ\)</span> on the rotor. What we need to do is
 to provide reference <span class="math">\(\sin\left(\omega t\right)\)</span> and
 <span class="math">\(\cos\left(\omega t\right)\)</span> signals to the stator and read
@@ -138,10 +139,10 @@ to provide reference <span class="math">\(\sin\left(\omega t\right)\)</span> and
 the rotor, where <span class="math">\(\alpha\)</span> is the shaft rotation angle,
 <span class="math">\(\omega = 2\pi f\)</span>, where frequency <span class="math">\(f\)</span> is 400Hz (which
 is also labeled on the encoder).</p>
-<p>The resolver has two bundles of wires coming out of it. Most probably
+<p>The resolver has two bundles of wires coming out of it. Most probably,
 one of the bundles corresponds to rotor windings, and another goes to the stator inside.
-What puzzles me though is that one of the bundles have 4 wires and another bundle has 8.
-The 4-wires bundle has red, black, yellow and blue wires, the
+What puzzles me, though, is that one of the bundles have 4 wires and another bundle has 8.
+The 4-wires bundle has red, black, yellow and blue wires, while the
 8-wires bundle has red, yellow, white, blue, green, purple, brown and orange
 wires. It turns out that there are color standards for the resolver wires,
 although 8-wires bundle colors don't match any color code scheme I could find.</p>
@@ -296,6 +297,11 @@ use 400.909Hz instead of 400Hz. This way we will have 110 samples per period at 
             <li><a class="tag p-category" href="../../categories/dsp/" rel="tag">dsp</a></li>
             <li><a class="tag p-category" href="../../categories/resolver/" rel="tag">resolver</a></li>
             <li><a class="tag p-category" href="../../categories/robotics/" rel="tag">robotics</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="next">
+                <a href="../fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/" rel="next" title="FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability. Part 1">Next post</a>
+            </li>
         </ul></nav></aside><section class="comments hidden-print"><h2>Comments</h2>
         
     
@@ -314,7 +320,7 @@ use 400.909Hz instead of 400Hz. This way we will have 110 samples per period at 
      }
  });
  </script></article><!--End of body content--><footer id="footer">
-            Contents © 2023         <a href="mailto:alexandr.savochkin@gmail.com">Alex Savochkin</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+            Contents © 2024         <a href="mailto:alexandr.savochkin@gmail.com">Alex Savochkin</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
             
             
         </footer>

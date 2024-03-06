@@ -1,32 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Alex Savochkin</title><link>https://alexandersavochkin.github.io/</link><description>I write about a variety of topics, primarily focusing on programming, embedded systems, do-it-yourself (DIY) projects, robotics, and machine learning (ML).</description><atom:link href="https://alexandersavochkin.github.io/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2023 &lt;a href="mailto:alexandr.savochkin@gmail.com"&gt;Alex Savochkin&lt;/a&gt; </copyright><lastBuildDate>Wed, 13 Dec 2023 23:43:23 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Unveiling the Resolver Enigma. Using black box method for understanding resolver and decoding shaft position. Part 1</title><link>https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/</link><dc:creator>Alex Savochkin</dc:creator><description>&lt;p&gt;Resolver are rotary transformers used for measuring
+<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Alex Savochkin</title><link>https://alexandersavochkin.github.io/</link><description>I write about a variety of topics, primarily focusing on programming, embedded systems, do-it-yourself (DIY) projects, robotics, and machine learning (ML).</description><atom:link href="https://alexandersavochkin.github.io/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2024 &lt;a href="mailto:alexandr.savochkin@gmail.com"&gt;Alex Savochkin&lt;/a&gt; </copyright><lastBuildDate>Wed, 06 Mar 2024 06:54:14 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability. Part 1</title><link>https://alexandersavochkin.github.io/posts/fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/</link><dc:creator>Alex Savochkin</dc:creator><description>&lt;section id="introduction"&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;GPIO could be considered one of the options for transferring data at a relatively fast speed
+into single-board computers (SBCs), such as the Raspberry Pi. Possible applications include
+capturing radio signals for software-defined radio (SDR) or processing data from a microphone
+array: each microphone typically captures fewer than or equal to 48K samples per second,
+and having a few tens or even hundreds of microphones can result in a significant transfer
+rate that needs to be managed.&lt;/p&gt;
+&lt;p&gt;SBCs, like the Raspberry Pi 4, have substantial computing power and typically
+a few gigabytes of RAM, in addition to exposed GPIO pins. The latter makes it easy
+to connect them to external devices. Thus, using them as the core of a high-speed data
+acquisition and processing system seems attractive.&lt;/p&gt;
+&lt;p&gt;There are two main approaches for transferring data to/from an SBC via GPIO:
+polling (also known as bit-banging) and using DMA. Surprisingly, both can be done in
+user space on RPi (although elevated privileges are needed). As shown in
+&lt;a class="reference external" href="https://github.com/hzeller/rpi-gpio-dma-demo"&gt;https://github.com/hzeller/rpi-gpio-dma-demo&lt;/a&gt;, polling is faster, so we will use polling in our experiments.&lt;/p&gt;
+&lt;p&gt;One of the challenges with polling, though, is that SBCs typically run Linux or another general-purpose
+operating system, so the CPU is a shared resource, and the system will interrupt our bit-banging process
+from time to time, causing the data flow to stop. Consequently, the data stream has to be buffered on the device side.&lt;/p&gt;
+&lt;p&gt;We will consider a strategy to minimize interruption of the polling process and try see the transfer rate we can acheive
+this way. We will also estimate the interruption time and the required buffer size on the device side which will allow not
+to loose any data.&lt;/p&gt;
+&lt;p&gt;Setting aside 1 core&lt;/p&gt;
+&lt;p&gt;Turns out that the Linux kernel allows to "set aside" some CPU cores, so the operation system won't schedule any processes to
+run on that cores by default. However the system is still aware of this reserved cores and processes can be explicitly assigned
+to these cores. There are a few things here we must take into account: first of all, these isolated cores are still interrupted
+by system clock. We expect the interruption time to be no more than a few tenths of microseconds, but measuring it is one
+of the goals of this work.&lt;/p&gt;
+&lt;p&gt;The kernel command line parameter isolcpu allows to "isolate set of CPU from disturbences". Let's "isolate" 3rd core or
+RPi4 CPU "form disturbance": here is my kernel command line params file &lt;code&gt;cmdline.txt&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;console=serial0,115200 console=tty1 ...[SKIPPED]... isolcpus=3&lt;/pre&gt;
+&lt;p&gt;The only change I made was adding &lt;code&gt;isolcpus=3&lt;/code&gt; at the end of file.
+Now, when you boot into the system you can use a tool like top/htop and confirm that 3rd core is allways idle.
+It is possible to explicitly assign a process to that core:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;taskset -c 3 yes &amp;gt; /dev/null &amp;amp;&lt;/pre&gt;
+&lt;p&gt;Which starts a dummy process &lt;code&gt;yes &amp;gt; /dev/null&lt;/code&gt; on 3rd CPU core. Our strategy is to run the polling process on
+the isolated core so we will have minimal interruptions from the OS.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="measuring-setup"&gt;
+&lt;h2&gt;Measuring setup&lt;/h2&gt;
+&lt;p&gt;To measure transfer rate and timing, we will build a simple timing device based on an FPGA,
+which has a fast internal counting timer. The device waits for the rising edge of the
+"Data Req" (data request) line and sets its 20-bit data output to the timer's value and the
+"Data Rdy" (data ready) line. The polling program detects the change in the "Data Rdy"
+line, reads and records the 20-bit data value from the parallel bus, and then sets "Data Req" to low on the SBC.
+This signals to the timing device that the SBC has successfully read the data, prompting
+it to set "Data Rdy" to low. The polling program detects the falling edge of the "Data Rdy"
+line and proceeds to the next cycle iteration. The difference in consecutive data reads from
+the timing device allows us to measure the time between loop iterations. We need to measure
+two values: the average number of cycles per unit of time (to determine throughput) and
+the maximum time between two iterations of the loop (to determine the required buffering size).&lt;/p&gt;
+&lt;p&gt;Here is the wiring diagram of the measuring setup:&lt;/p&gt;
+&lt;img alt="/images/RPi-Timing-wiring.png" src="https://alexandersavochkin.github.io/images/RPi-Timing-wiring.png" style="width: 675.0px; height: 675.0px;"&gt;
+&lt;p&gt;The reason we use a 20-bit data bus is that we hit the maximum number pins available on Icestick.
+The number of GPIO pins on the Raspberry Pi is 28, and since the protocol uses 3 lines for control,
+we have 25 pins remaining on the SBC side.&lt;/p&gt;
+&lt;p&gt;The exchange process described above can be visualized as follows:&lt;/p&gt;
+&lt;img alt="/images/RPi-Timing-Sequence.png" src="https://alexandersavochkin.github.io/images/RPi-Timing-Sequence.png" style="width: 675.0px; height: 675.0px;"&gt;
+&lt;p&gt;The polling program is written in C and uses direct access to GPIO registers in memory. In
+order to get access to the memory-mapped GPIO registers known by their physical addresses in
+memory, it uses mmap to map the /dev/mem file into the program's address space. See ... for details.&lt;/p&gt;
+&lt;p&gt;I used verilog to program the FPGA on the "timing device". Both the FPGA and the Raspberry Pi code are available at ....&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="results"&gt;
+&lt;h2&gt;Results&lt;/h2&gt;
+&lt;p&gt;The program reads 500M values of the timer from the FPGA and records and dumps the raw 20 lower bits of the timer to a file.
+I post-processed the file to calculate the time between two consecutive reads, so we can see the distribution of the time intervals.&lt;/p&gt;
+&lt;p&gt;Some observations: initially the typical timer increment between reads is aroun 42 timer clicks, here is the first 1000 reads&lt;/p&gt;
+&lt;pre class="literal-block"&gt;42,   42,   41,    0,   84,   41,   42,   41,   42,   41,    0,
+83,   42,   41,   42,   42,   41,   42,   42,   41,   42,   41,
+41,   42,   42,   41,   42,    0,   83,   41,   43,   41,    0,
+83,   41,   42,   41,   42,   41,   42,   42,   41,   42,   42,
+41,   42,   42,   41,   41,   42,   42,   41,   42,   41,   42,
+41,   42,   42,   41,   42,   41,    0,   84,   41,   42,   41,
+42,   41,   42,   42,    0,   83,   42,   41,   41,   42,   42,
+41,   42,   42,   41,   42,   42,   41,   42,   42,   42,   41,
+41,   42,   41,   42,   41,   42,   42,    0,   83,   41,   42,
+42,   41,   41,   42,   41,   42,   42,   41,   41,   42,   42,
+43,   42,    0,   83,   41,   42,   41,    0,   84,   41,   42,
+41,   42,   41,   42,   42,   42,   41,   42,   41,   42,   42,
+42,   41,   42,   41,   41,   42,   42,   41,   42,    0,   83,
+42,   42,    0,   83,   42,   41,   41,   42,    0,   83,  793,
+-710,   42,   41,   42,   42,   42,   41,   42,   41,    0,   83,
+42,   41,   42,   41,   42,   42,   41,   42,   42,   41,    0,
+83,   42,   41,   42,    0,   83,   41,   43,   41,   42,   41,
+0,   83,   41,   42,    0,   83,   42,   41,   42,   42,   41,
+...&lt;/pre&gt;
+&lt;p&gt;Since the timer frequency is 50.25MHz, the typical time between reads is 42/50.25MHz = 0.836us, or approximatelly
+1.2M reads per second.&lt;/p&gt;
+&lt;p&gt;After approximately 67K the typical time between reads decreases to 19 timer clicks, or 0.378us, or 2.6M reads per second.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;19,   15,   15,   15,   15,    0,   31,   18,   16,   19,   15,
+19,   19,   19,   19,   19,   19,   19,   19,   15,   15,   15,
+15,    0,   31,   19,   19,   19,   19,   19,    0,   34,   16,
+19,    0,   34,   19,   19,   19,   15,   15,    0,   31,   19,
+19,    0,   34,   19,   19,   16,   15,   15,   15,   16,    0,
+34,   19,   19,   19,   19,   19,   19,   15,   16,   19,   19,
+19,   19,   15,   19,   15,   15,   15,   15,   16,   19,   19,
+19,    0,   34,   19,   19,   19,   19,   19,   19,    0,   34,
+16,    0,   34,   15,   15,    0,   31,    0,   34,   19,   19,
+19,   19,   19,   19,    0,   34,   19,    0,   34,   19,   19,
+19,   19,   19,   19,   19,   19,   19,   19,    0,   34,   19,
+19,   19,   19,   19,   19,   19,   19,   19,   19,   19,   19,
+15,   16,   19,   19,   19,   19,   19,   19,   19,   19,   19,
+19,   16,   15,    0,   31,   19,   19,   19,   15,   19,   19,
+0,   34,   19,   19,   15,   19,   19,   15,   15,   15,   16,
+15,   19,   19,   15,   15,   15,   16,    0,    0,   49,   19,
+19,   19,   19,   15,   15,   15,   16,    0,   34,   19,   19,
+19,    0,   34,   19,   19,   19,   19,    0,   34,   19,  538,
+-504,   15,   15,   15,    0,   31,   19,   19,   19,   19,   19,
+16,   19,   19,   19,   19,   19,   19,   15,   19,   19,   19,
+19,   19,   19,   19,   19,   19,    0,   34,   15,   16,   19,
+19,   19,   19,   19,   19,   19,   19,   15,   16,   19,   19,&lt;/pre&gt;
+&lt;p&gt;The second observation is that sometimes the timer difference is 0, which means we read the same value twice. My
+theory is that it is due to read/write operation reordering, and, perhaps, we need a memory barrier in the polling loop.
+Although the &lt;a class="reference external" href="https://datasheets.raspberrypi.com/bcm2711/bcm2711-peripherals.pdf"&gt;perpheral guide for the BCM2711&lt;/a&gt;
+says that you don't need memory barriers if you work with the same peripheral (see page 6 of the guide).&lt;/p&gt;
+&lt;p&gt;The third observation is that sometimes the sometimes we get a negative value with a large magnitude and a "compensating" positive value
+next to it: 19, 538, -504, 15. It is probably a glitch in the data, like noise in 9th bit of the parallel bus, corresponding to 512 (just a guess).&lt;/p&gt;
+&lt;p&gt;Occasionaly we have a few hundreds or even a couple of thousands of timer clicks between reads, which is probably due to the the OS interrupts.&lt;/p&gt;
+&lt;p&gt;Here is the histogram of the time intervals between reads for 500M cycles:&lt;/p&gt;
+&lt;img alt="/images/FPGA-timing-hist1.png" src="https://alexandersavochkin.github.io/images/FPGA-timing-hist1.png" style="width: 675.0px; height: 675.0px;"&gt;
+&lt;img alt="/images/FPGA-timing-hist2.png" src="https://alexandersavochkin.github.io/images/FPGA-timing-hist2.png" style="width: 675.0px; height: 675.0px;"&gt;
+&lt;/section&gt;
+&lt;section id="conclusion"&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Comming soon.&lt;/p&gt;
+&lt;/section&gt;</description><guid>https://alexandersavochkin.github.io/posts/fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/</guid><pubDate>Tue, 05 Mar 2024 01:07:21 GMT</pubDate></item><item><title>Unveiling the Resolver Enigma. Using black box method for understanding resolver and decoding shaft position. Part 1</title><link>https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/</link><dc:creator>Alex Savochkin</dc:creator><description>&lt;p&gt;Resolvers are rotary transformers used for measuring
 rotation angle of a shaft. Resolvers give analog output in form of
 phase shift between sinusoidal signals, so the output signal must
 be converted into digital form if we want to use them with digital
 control systems.&lt;/p&gt;
-&lt;p&gt;In most modern applications another type of sensor, encoders, are usual
-"go to" solution for measuring shaft position and velocity: they are inherently
+&lt;p&gt;In most modern applications another type of sensor, encoders, is the usual
+"go-to" solution for measuring shaft position and velocity: they are inherently
 digital which makes it easy to integrate them in modern control
 systems, they have higher accuracy and precision then resolvers
 and they can cost fraction of equivalent resolver.&lt;/p&gt;
-&lt;p&gt;Nevertheless resolvers are still applicable: they can operate
+&lt;p&gt;Nevertheless resolvers are still applicable. They can operate
 in harsh environments such as extreme temperatures, shock/vibration
-and ionizing radiation. Resolvers has been around for
+and ionizing radiation. Resolvers have been around for
 longer time so they can be found in old equipment.&lt;/p&gt;
 &lt;p&gt;Although resolver-to-digital converter ICs exist, we will rely
-on a sound card and programmatic approach in order to read the shaft
+on a sound card and a programmatic approach in order to read the shaft
 angle from a resolver and will have some fun along the way.
-In Part 1 we will use a personal computer sound card along with
+In Part 1, we will use a personal computer sound card along with
 a bunch of simple tools for understending the pinout, generating
 required exitation signals, reading the output and write the code
 which will extract shaft angle from the output  signal using PortAdio,
 a popular C library for audio.&lt;/p&gt;
 &lt;p&gt;To begin I purchased a resolver with the labeling "JQH-11-AGS-4/A386" on eBay.&lt;/p&gt;
 &lt;img alt="/images/jqh-11-agc4-a386.jpg" src="https://alexandersavochkin.github.io/images/jqh-11-agc4-a386.jpg" style="width: 378.0px; height: 504.0px;"&gt;
-&lt;p&gt;Quick internet search didn't give me any datasheets or documentation,
+&lt;p&gt;A quick internet search didn't yeild any datasheets or documentation,
 so let's try blackbox approach. The labeling on the encoder says:
-&lt;strong&gt;ROTOR 2 PHASE 9.75 VOLTS&lt;/strong&gt; and &lt;strong&gt;STATOR 2 PHASE 10.1 VOLTS&lt;/strong&gt;,
-so most probably we have two windings at &lt;span class="math"&gt;\(90^\circ\)&lt;/span&gt; on the stator
+&lt;strong&gt;ROTOR 2 PHASE 9.75 VOLTS&lt;/strong&gt; and &lt;strong&gt;STATOR 2 PHASE 10.1 VOLTS&lt;/strong&gt;.
+Most probably, we have two windings at &lt;span class="math"&gt;\(90^\circ\)&lt;/span&gt; on the stator
 at and two windings at &lt;span class="math"&gt;\(90^\circ\)&lt;/span&gt; on the rotor. What we need to do is
 to provide reference &lt;span class="math"&gt;\(\sin\left(\omega t\right)\)&lt;/span&gt; and
 &lt;span class="math"&gt;\(\cos\left(\omega t\right)\)&lt;/span&gt; signals to the stator and read
@@ -35,10 +161,10 @@ to provide reference &lt;span class="math"&gt;\(\sin\left(\omega t\right)\)&lt;/
 the rotor, where &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt; is the shaft rotation angle,
 &lt;span class="math"&gt;\(\omega = 2\pi f\)&lt;/span&gt;, where frequency &lt;span class="math"&gt;\(f\)&lt;/span&gt; is 400Hz (which
 is also labeled on the encoder).&lt;/p&gt;
-&lt;p&gt;The resolver has two bundles of wires coming out of it. Most probably
+&lt;p&gt;The resolver has two bundles of wires coming out of it. Most probably,
 one of the bundles corresponds to rotor windings, and another goes to the stator inside.
-What puzzles me though is that one of the bundles have 4 wires and another bundle has 8.
-The 4-wires bundle has red, black, yellow and blue wires, the
+What puzzles me, though, is that one of the bundles have 4 wires and another bundle has 8.
+The 4-wires bundle has red, black, yellow and blue wires, while the
 8-wires bundle has red, yellow, white, blue, green, purple, brown and orange
 wires. It turns out that there are color standards for the resolver wires,
 although 8-wires bundle colors don't match any color code scheme I could find.&lt;/p&gt;

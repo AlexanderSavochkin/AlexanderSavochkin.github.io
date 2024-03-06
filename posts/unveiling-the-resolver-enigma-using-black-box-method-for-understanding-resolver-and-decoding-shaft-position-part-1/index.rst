@@ -10,27 +10,27 @@
 .. has_math: true
 -->
 
-Resolver are rotary transformers used for measuring 
+Resolvers are rotary transformers used for measuring 
 rotation angle of a shaft. Resolvers give analog output in form of 
 phase shift between sinusoidal signals, so the output signal must 
 be converted into digital form if we want to use them with digital
 control systems.
 
-In most modern applications another type of sensor, encoders, are usual 
-"go to" solution for measuring shaft position and velocity: they are inherently
+In most modern applications another type of sensor, encoders, is the usual 
+"go-to" solution for measuring shaft position and velocity: they are inherently
 digital which makes it easy to integrate them in modern control 
 systems, they have higher accuracy and precision then resolvers 
 and they can cost fraction of equivalent resolver.
 
-Nevertheless resolvers are still applicable: they can operate 
+Nevertheless resolvers are still applicable. They can operate 
 in harsh environments such as extreme temperatures, shock/vibration 
-and ionizing radiation. Resolvers has been around for
+and ionizing radiation. Resolvers have been around for
 longer time so they can be found in old equipment.
 
 Although resolver-to-digital converter ICs exist, we will rely
-on a sound card and programmatic approach in order to read the shaft
+on a sound card and a programmatic approach in order to read the shaft
 angle from a resolver and will have some fun along the way.
-In Part 1 we will use a personal computer sound card along with 
+In Part 1, we will use a personal computer sound card along with 
 a bunch of simple tools for understending the pinout, generating 
 required exitation signals, reading the output and write the code 
 which will extract shaft angle from the output  signal using PortAdio,
@@ -43,10 +43,10 @@ To begin I purchased a resolver with the labeling "JQH-11-AGS-4/A386" on eBay.
    :width: 756
    :scale: 50
 
-Quick internet search didn't give me any datasheets or documentation,
+A quick internet search didn't yeild any datasheets or documentation,
 so let's try blackbox approach. The labeling on the encoder says:
-**ROTOR 2 PHASE 9.75 VOLTS** and **STATOR 2 PHASE 10.1 VOLTS**, 
-so most probably we have two windings at :math:`90^\circ` on the stator
+**ROTOR 2 PHASE 9.75 VOLTS** and **STATOR 2 PHASE 10.1 VOLTS**. 
+Most probably, we have two windings at :math:`90^\circ` on the stator
 at and two windings at :math:`90^\circ` on the rotor. What we need to do is
 to provide reference :math:`\sin\left(\omega t\right)` and 
 :math:`\cos\left(\omega t\right)` signals to the stator and read 
@@ -56,10 +56,10 @@ the rotor, where :math:`\alpha` is the shaft rotation angle,
 :math:`\omega = 2\pi f`, where frequency :math:`f` is 400Hz (which
 is also labeled on the encoder).
 
-The resolver has two bundles of wires coming out of it. Most probably 
+The resolver has two bundles of wires coming out of it. Most probably,
 one of the bundles corresponds to rotor windings, and another goes to the stator inside. 
-What puzzles me though is that one of the bundles have 4 wires and another bundle has 8.
-The 4-wires bundle has red, black, yellow and blue wires, the
+What puzzles me, though, is that one of the bundles have 4 wires and another bundle has 8.
+The 4-wires bundle has red, black, yellow and blue wires, while the
 8-wires bundle has red, yellow, white, blue, green, purple, brown and orange 
 wires. It turns out that there are color standards for the resolver wires, 
 although 8-wires bundle colors don't match any color code scheme I could find.

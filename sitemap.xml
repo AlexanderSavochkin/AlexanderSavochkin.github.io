@@ -7,27 +7,47 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <url>
   <loc>https://alexandersavochkin.github.io/</loc>
-  <lastmod>2023-12-06T02:48:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/2023/</loc>
   <lastmod>2023-05-23T21:27:00Z</lastmod>
  </url>
  <url>
+  <loc>https://alexandersavochkin.github.io/2024/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </url>
+ <url>
   <loc>https://alexandersavochkin.github.io/archive.html</loc>
-  <lastmod>2023-12-13T23:18:00Z</lastmod>
+  <lastmod>2024-03-06T06:54:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/analog/</loc>
   <lastmod>2023-12-13T23:20:00Z</lastmod>
  </url>
  <url>
+  <loc>https://alexandersavochkin.github.io/categories/chatgpt/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </url>
+ <url>
   <loc>https://alexandersavochkin.github.io/categories/dsp/</loc>
   <lastmod>2023-12-13T23:20:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/llm/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/openai/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/categories/python/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/resolver/</loc>
@@ -48,6 +68,14 @@
  <url>
   <loc>https://alexandersavochkin.github.io/pages/about/</loc>
   <lastmod>2023-12-06T02:48:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/posts/creating-job-application-cover-letters-with-the-openai-chatgpt-api/</loc>
+  <lastmod>2023-12-14T01:08:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://alexandersavochkin.github.io/posts/fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/posts/unveiling-the-resolver-enigma-using-black-box-method-for-understanding-resolver-and-decoding-shaft-position-part-1/</loc>
