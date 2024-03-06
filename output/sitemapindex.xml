@@ -7,30 +7,46 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <sitemap>
   <loc>https://alexandersavochkin.github.io/categories/analog.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/chatgpt.xml</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/categories/dsp.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/llm.xml</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/openai.xml</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://alexandersavochkin.github.io/categories/python.xml</loc>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/categories/resolver.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/categories/robotics.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/galleries/rss.xml</loc>
-  <lastmod>2023-12-13T23:18:00Z</lastmod>
+  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/rss.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-06T06:54:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://alexandersavochkin.github.io/sitemap.xml</loc>
-  <lastmod>2023-12-13T23:20:00Z</lastmod>
+  <lastmod>2024-03-06T06:54:00Z</lastmod>
  </sitemap>
 </sitemapindex>
