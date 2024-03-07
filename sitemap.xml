@@ -23,31 +23,15 @@
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/</loc>
-  <lastmod>2024-03-05T14:47:00Z</lastmod>
+  <lastmod>2024-03-06T06:55:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/analog/</loc>
   <lastmod>2023-12-13T23:20:00Z</lastmod>
  </url>
  <url>
-  <loc>https://alexandersavochkin.github.io/categories/chatgpt/</loc>
-  <lastmod>2024-03-05T14:47:00Z</lastmod>
- </url>
- <url>
   <loc>https://alexandersavochkin.github.io/categories/dsp/</loc>
   <lastmod>2023-12-13T23:20:00Z</lastmod>
- </url>
- <url>
-  <loc>https://alexandersavochkin.github.io/categories/llm/</loc>
-  <lastmod>2024-03-05T14:47:00Z</lastmod>
- </url>
- <url>
-  <loc>https://alexandersavochkin.github.io/categories/openai/</loc>
-  <lastmod>2024-03-05T14:47:00Z</lastmod>
- </url>
- <url>
-  <loc>https://alexandersavochkin.github.io/categories/python/</loc>
-  <lastmod>2024-03-05T14:47:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/categories/resolver/</loc>
@@ -68,10 +52,6 @@
  <url>
   <loc>https://alexandersavochkin.github.io/pages/about/</loc>
   <lastmod>2023-12-06T02:48:00Z</lastmod>
- </url>
- <url>
-  <loc>https://alexandersavochkin.github.io/posts/creating-job-application-cover-letters-with-the-openai-chatgpt-api/</loc>
-  <lastmod>2023-12-14T01:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://alexandersavochkin.github.io/posts/fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1/</loc>
