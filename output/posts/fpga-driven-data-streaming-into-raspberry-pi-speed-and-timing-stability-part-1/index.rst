@@ -1,7 +1,7 @@
 .. title: FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability. Part 1
 .. slug: fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1
 .. date: 2024-03-04 17:07:21 UTC-08:00
-.. tags: 
+.. tags: FPGA, Verilog 
 .. category: 
 .. link: 
 .. description: 
@@ -138,7 +138,7 @@ The polling program (left side of the diagram) is written in C. Here is the sour
     }
 
 The FPGA code is written in Verilog. Here is some highlights of the timing device design. The icestick has
-a 12 MHz reference clock, and we use it with PLL available on the ICE40 FPGA for generate 50.25 MHz internal 
+a 12 MHz reference clock, and we use it with PLL available on the ICE40 FPGA for generatint 50.25 MHz internal 
 "fast" clock. So our timer resolution is approximatelly 20 ns. Here is how we declare the PLL in verilog:
 
 .. code-block:: verilog
@@ -167,18 +167,19 @@ of the exchagne diagram) can be described by the following verilog code:
 
     module transfer_msr(
         input ref_clk,  //ICEStick 12MHz clock
-        input rst,      //Reset signal from SBC
-        input data_req, //Data request signal from SBC
-        output reg data_rdy, //Data ready signal to SBC
-        output reg [23:0] msr_data //24-bit data to SBC
+        input rst,
+         input data_req,
+         output reg data_rdy,
+         output reg [23:0] msr_data
     );
+         reg data_req_1; 
+         reg data_req_2;
+         reg data_req_3;
+         reg [23:0] timer_count;
 
-        reg prev_data_req;
-        reg [23:0] timer_count;
+         //...[SKIPPED PLL declaration]...
 
-        //...[SKIPPED PLL declaration]...
-
-        always @(posedge clk) begin
+         always @(posedge clk) begin
             if (rst) begin  //Reset the device on HIGH level of the reset signal
                 msr_data <= 24'b0;
                 timer_count <= 24'b0;
@@ -221,29 +222,23 @@ Results
 The program reads 500M values of the timer from the FPGA and records and dumps the raw 20 lower bits of the timer to a file.
 I post-processed the file to calculate the time between two consecutive reads, so we can see the distribution of the time intervals.
 
-Some observations: initially the typical timer increment between reads is aroun 42 timer clicks, here is the first 1000 reads
+Some observations: initially the typical timer increment between reads is aroun 42 timer clicks, here is the first 200 reads
 
 ::
 
-    42,   42,   41,    0,   84,   41,   42,   41,   42,   41,    0,
-    83,   42,   41,   42,   42,   41,   42,   42,   41,   42,   41,
-    41,   42,   42,   41,   42,    0,   83,   41,   43,   41,    0,
-    83,   41,   42,   41,   42,   41,   42,   42,   41,   42,   42,
-    41,   42,   42,   41,   41,   42,   42,   41,   42,   41,   42,
-    41,   42,   42,   41,   42,   41,    0,   84,   41,   42,   41,
-    42,   41,   42,   42,    0,   83,   42,   41,   41,   42,   42,
-    41,   42,   42,   41,   42,   42,   41,   42,   42,   42,   41,
-    41,   42,   41,   42,   41,   42,   42,    0,   83,   41,   42,
-    42,   41,   41,   42,   41,   42,   42,   41,   41,   42,   42,
-    43,   42,    0,   83,   41,   42,   41,    0,   84,   41,   42,
-    41,   42,   41,   42,   42,   42,   41,   42,   41,   42,   42,
-    42,   41,   42,   41,   41,   42,   42,   41,   42,    0,   83,
-    42,   42,    0,   83,   42,   41,   41,   42,    0,   83,  793,
-    -710,   42,   41,   42,   42,   42,   41,   42,   41,    0,   83,
-    42,   41,   42,   41,   42,   42,   41,   42,   42,   41,    0,
-    83,   42,   41,   42,    0,   83,   41,   43,   41,   42,   41,
-    0,   83,   41,   42,    0,   83,   42,   41,   42,   42,   41,
-    ...
+       41, 42, 41, 42, 42, 41, 42, 41, 41, 43, 41, 42, 41, 42, 41, 41, 42,
+       41, 42, 41, 42, 41, 42, 42, 41, 42, 41, 42, 42, 41, 42, 41, 41, 42,
+       41, 43, 41, 41, 42, 42, 41, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42,
+       41, 42, 41, 42, 42, 41, 41, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42,
+       42, 41, 41, 42, 41, 42, 42, 41, 42, 42, 41, 42, 41, 42, 41, 41, 42,
+       42, 41, 42, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42, 41, 42, 42, 41,
+       42, 42, 41, 41, 42, 42, 41, 41, 42, 41, 42, 42, 42, 41, 42, 41, 42,
+       41, 42, 41, 41, 43, 41, 42, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42,
+       41, 42, 41, 42, 42, 41, 42, 41, 42, 41, 42, 41, 41, 42, 41, 42, 42,
+       42, 41, 42, 41, 42, 41, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42, 41,
+       42, 42, 41, 41, 42, 41, 42, 41, 43, 41, 41, 42, 42, 41, 42, 41, 42,
+       41, 42, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42 
+
 
 Since the timer frequency is 50.25MHz, the typical time between reads is 42/50.25MHz = 0.836us, or approximatelly
 1.2M reads per second.
@@ -252,36 +247,22 @@ After approximately 67K the typical time between reads decreases to 19 timer cli
 
 ::
 
-    19,   15,   15,   15,   15,    0,   31,   18,   16,   19,   15,
-    19,   19,   19,   19,   19,   19,   19,   19,   15,   15,   15,
-    15,    0,   31,   19,   19,   19,   19,   19,    0,   34,   16,
-    19,    0,   34,   19,   19,   19,   15,   15,    0,   31,   19,
-    19,    0,   34,   19,   19,   16,   15,   15,   15,   16,    0,
-    34,   19,   19,   19,   19,   19,   19,   15,   16,   19,   19,
-    19,   19,   15,   19,   15,   15,   15,   15,   16,   19,   19,
-    19,    0,   34,   19,   19,   19,   19,   19,   19,    0,   34,
-    16,    0,   34,   15,   15,    0,   31,    0,   34,   19,   19,
-    19,   19,   19,   19,    0,   34,   19,    0,   34,   19,   19,
-    19,   19,   19,   19,   19,   19,   19,   19,    0,   34,   19,
-    19,   19,   19,   19,   19,   19,   19,   19,   19,   19,   19,
-    15,   16,   19,   19,   19,   19,   19,   19,   19,   19,   19,
-    19,   16,   15,    0,   31,   19,   19,   19,   15,   19,   19,
-    0,   34,   19,   19,   15,   19,   19,   15,   15,   15,   16,
-    15,   19,   19,   15,   15,   15,   16,    0,    0,   49,   19,
-    19,   19,   19,   15,   15,   15,   16,    0,   34,   19,   19,
-    19,    0,   34,   19,   19,   19,   19,    0,   34,   19,  538,
-    -504,   15,   15,   15,    0,   31,   19,   19,   19,   19,   19,
-    16,   19,   19,   19,   19,   19,   19,   15,   19,   19,   19,
-    19,   19,   19,   19,   19,   19,    0,   34,   15,   16,   19,
-    19,   19,   19,   19,   19,   19,   19,   15,   16,   19,   19,
+        19,  19,  19,  18,  19,  20,  23,  18,  20,  19,  19,  22,  19,
+        19,  19,  20,  22,  19,  19,  19,  19,  20,  23,  19,  19,  18,
+        19,  23,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
+        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
+        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
+        19,  19,  23,  23,  23,  19,  22,  19,  20,  19,  23,  19,  19,
+        19,  23,  23,  18,  20,  22,  19,  19,  19,  19,  20,  18,  19,
+        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
+        19,  19,  19,  20,  18,  19,  20,  22,  19,  19,  19,  19,  19,
+        19,  23,  19,  19,  19,  19,  19,  20,  22,  19,  19,  19,  20,
+        22,  19,  19, 277,  23,  18,  19,  19,  19,  19,  19,  23,  19,
+        23,  18,  19,  19,  20,  22,  19,  19,  19,  19,  19,  19,  19,
+        23,  19,  23,  22,  19,  19,  20,  22,  20,  23,  18,  23,  20,
+        18,  20,  18,  19,  23,  19,  19,  19,  19,  19,  19,  19,  19,
+        19,  19,  19,  23,  22,  19,  20,  19,  19,  19,  19,  19,  19,
 
-The second observation is that sometimes the timer difference is 0, which means we read the same value twice. My 
-theory is that it is due to read/write operation reordering, and, perhaps, we need a memory barrier in the polling loop.
-Although the `perpheral guide for the BCM2711 <https://datasheets.raspberrypi.com/bcm2711/bcm2711-peripherals.pdf>`_ 
-says that you don't need memory barriers if you work with the same peripheral (see page 6 of the guide).
-
-The third observation is that sometimes the sometimes we get a negative value with a large magnitude and a "compensating" positive value
-next to it: 19, 538, -504, 15. It is probably a glitch in the data, like noise in 9th bit of the parallel bus, corresponding to 512 (just a guess).
 
 Occasionaly we have a few hundreds or even a couple of thousands of timer clicks between reads, which is probably due to the the OS interrupts.
 
@@ -302,7 +283,7 @@ Here is the histogram of the time intervals between reads for 500M cycles:
 Conclusion, Takeaways, Future Work and Follow-ups
 =========================================================
 
-1. I really loved working with IceStick and IceStorm tools. It is a great platform for learning and prototyping. 
+1. I really loved working with IceStick and APIO/IceStorm tools. It is a great platform for learning and prototyping. 
    Hovewer, the number of exposed pins is very limited, and we hit the limit here
 
 2. Looks like the approach we used here allows us to connect around 20 microphones safely, and we probably need 
@@ -310,7 +291,5 @@ Conclusion, Takeaways, Future Work and Follow-ups
    understand if it is possible to squeeze more speed out of the SBC. Another option would be using more powerful 
    FPGA with big RAM attached to it and moving some of the DSP processing to the FPGA.
 
-4. I need to understand the nature of the glitches in the data get rid of them, if possible.
-
-5. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
+3. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
 
