@@ -291,5 +291,9 @@ Conclusion, Takeaways, Future Work and Follow-ups
    understand if it is possible to squeeze more speed out of the SBC. Another option would be using more powerful 
    FPGA with big RAM attached to it and moving some of the DSP processing to the FPGA.
 
-3. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
+3. I need to understand the "slow start" effect: why the instant transfer speed is 1.2 MSps/s initially and after
+   reading 60K-65K samples it gets more then twice faster, 2.6 MSps/s. Can we control it? If we acheive stable 
+   2.6 MSps/s transfer rate, we can capture the data from 54 microphones at full 48Ksps rate.
+
+4. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
 
