@@ -293,7 +293,8 @@ Conclusion, Takeaways, Future Work and Follow-ups
 
 3. I need to understand the "slow start" effect: why the instant transfer speed is 1.2 MSps/s initially and after
    reading 60K-65K samples it gets more then twice faster, 2.6 MSps/s. Can we control it? If we acheive stable 
-   2.6 MSps/s transfer rate, we can capture the data from 54 microphones at full 48Ksps rate.
+   2.6 MSps/s transfer rate, we can capture the data from 54 microphones at full 48Ksps rate. My current hypothesis 
+   is that it is related DVFS (Dynamic Voltage and Frequence Scaling). I am going to investigate it and update this post
+   according to the results.
 
 4. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
-
