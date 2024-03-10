@@ -261,7 +261,7 @@ Since the timer frequency is 50.25MHz, the typical time between reads is 19/50.2
 
 Occasionaly we have a few hundreds or even a couple of thousands of timer clicks between reads, which is probably due to the the OS interrupts.
 
-Here is the histogram which illustrates distribution of pollng cycles for 500M cycles:
+Here is the histogram which illustrates the distribution of pollng cycles timing for 500M cycles:
 
 .. image :: /images/FPGA-timing-hist1.png
    :height: 1350
