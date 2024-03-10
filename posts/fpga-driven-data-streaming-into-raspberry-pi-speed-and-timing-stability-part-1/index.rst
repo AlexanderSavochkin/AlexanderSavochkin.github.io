@@ -14,7 +14,7 @@ Introduction
 GPIO could be considered one of the options for transferring data at a relatively fast speed 
 into single-board computers (SBCs), such as the Raspberry Pi. Possible applications include 
 capturing radio signals for software-defined radio (SDR) or processing data from a microphone 
-array: each microphone typically captures fewer than or equal to 48K samples per second, 
+array: each microphone typically captures up to 48K samples per second, 
 and having a few tens or even hundreds of microphones can result in a significant transfer 
 rate that needs to be managed.
 
@@ -42,15 +42,15 @@ We will consider a strategy to minimize interruption of the polling process and 
 this way. We will also estimate the interruption time and the required buffer size on the device side which will allow not
 to loose any data.
 
-===================================
-Reseving a CPU core for polling
-===================================
+=====================================================================
+Reseving a CPU core for polling. Keeping the CPU frequency at maximum
+=====================================================================
 
 Turns out that the Linux kernel allows to "set aside" one or a few CPU cores, so the operation system 
 won't schedule any processes to run on that cores by default. However the system is still aware of 
 this "reserved" cores and processes can be explicitly assigned to these cores. There are a few 
 things here we must take into account: first of all, these isolated cores are still interrupted 
-by system clock. We expect the interruption time to be no more than a few tenths of microseconds,
+by the system clock. We expect the interruption time to be no more than a few tenths of microseconds,
 but measuring it is one of the goals of this work.
 
 The kernel command line parameter :code:`isolcpu <core>` allows to "isolate set of CPU from disturbences". 
@@ -72,6 +72,22 @@ It is possible to explicitly assign a process to that core:
 
 Which starts a dummy process :code:`yes > /dev/null` on 3rd CPU core. Our strategy is to run the polling process on 
 the isolated core so we will have minimal interruptions from the OS.
+
+Another important consideration is that Raspberry Pi 4 has Dynamic Voltage and Frequency Scaling (DVFS) feature,
+so by default the CPU core frequency is lowered when it idles. The frequence scaling policy is controlled by 
+so-called "governors". The default governor is "ondemand", which tries to keep the CPU frequency as low as possible 
+when the system is idle and raises it to the maximum value when the system is under load.
+In my experiments I found that the task assigned to the isolated core is starting to run slower and
+after approximatelly 60 milliseconds the speed gets 2-2.5x faster. If we want to get stable and fast 
+cycles we need to change the CPU governor to "performance" mode for the core we want to run on. The performance governor
+keeps the CPU frequency at the maximum value all the time at the expense of increased power consumption and heat generation.
+Here is how we can do it:
+
+::
+
+    sudo sh -c "echo performance > /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor"
+
+In this mode the CPU core will run at the maximum frequency all the time.
 
 =======================
 Measuring setup
@@ -222,47 +238,26 @@ Results
 The program reads 500M values of the timer from the FPGA and records and dumps the raw 20 lower bits of the timer to a file.
 I post-processed the file to calculate the time between two consecutive reads, so we can see the distribution of the time intervals.
 
-Some observations: initially the typical timer increment between reads is aroun 42 timer clicks, here is the first 200 reads
+Some observations: the typical timer increment between reads is aroun 19 timer clicks, here is the first 200 reads
 
 ::
 
-       41, 42, 41, 42, 42, 41, 42, 41, 41, 43, 41, 42, 41, 42, 41, 41, 42,
-       41, 42, 41, 42, 41, 42, 42, 41, 42, 41, 42, 42, 41, 42, 41, 41, 42,
-       41, 43, 41, 41, 42, 42, 41, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42,
-       41, 42, 41, 42, 42, 41, 41, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42,
-       42, 41, 41, 42, 41, 42, 42, 41, 42, 42, 41, 42, 41, 42, 41, 41, 42,
-       42, 41, 42, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42, 41, 42, 42, 41,
-       42, 42, 41, 41, 42, 42, 41, 41, 42, 41, 42, 42, 42, 41, 42, 41, 42,
-       41, 42, 41, 41, 43, 41, 42, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42,
-       41, 42, 41, 42, 42, 41, 42, 41, 42, 41, 42, 41, 41, 42, 41, 42, 42,
-       42, 41, 42, 41, 42, 41, 42, 41, 42, 41, 42, 41, 42, 42, 41, 42, 41,
-       42, 42, 41, 41, 42, 41, 42, 41, 43, 41, 41, 42, 42, 41, 42, 41, 42,
-       41, 42, 42, 41, 42, 42, 41, 42, 42, 41, 41, 42 
+       23, 19, 19, 22, 19, 19, 19, 23, 20, 22, 19, 19, 19, 19, 19, 19, 19,
+       20, 22, 19, 19, 19, 19, 19, 19, 19, 19, 23, 19, 19, 19, 19, 20, 23,
+       23, 22, 20, 19, 18, 19, 19, 19, 20, 19, 22, 19, 19, 19, 20, 18, 19,
+       20, 18, 23, 23, 19, 19, 23, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20,
+       19, 19, 22, 19, 20, 22, 19, 20, 18, 19, 20, 23, 19, 19, 18, 19, 19,
+       19, 19, 19, 20, 19, 23, 23, 22, 19, 19, 19, 19, 19, 20, 19, 22, 19,
+       19, 20, 19, 18, 23, 19, 20, 22, 19, 19, 19, 20, 19, 22, 19, 19, 23,
+       19, 19, 19, 19, 19, 23, 19, 19, 20, 19, 19, 19, 19, 19, 20, 18, 20,
+       23, 22, 19, 19, 19, 19, 19, 19, 20, 19, 23, 22, 19, 19, 19, 19, 19,
+       19, 20, 22, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23,
+       22, 19, 19, 19, 19, 20, 22, 19, 19, 20, 18, 20, 22, 19, 19, 23, 19,
+       19, 19, 19, 20, 23, 22, 19, 19, 19, 19, 19, 19
 
 
-Since the timer frequency is 50.25MHz, the typical time between reads is 42/50.25MHz = 0.836us, or approximatelly
-1.2M reads per second.
-
-After approximately 67K the typical time between reads decreases to 19 timer clicks, or 0.378us, or 2.6M reads per second.
-
-::
-
-        19,  19,  19,  18,  19,  20,  23,  18,  20,  19,  19,  22,  19,
-        19,  19,  20,  22,  19,  19,  19,  19,  20,  23,  19,  19,  18,
-        19,  23,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
-        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
-        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
-        19,  19,  23,  23,  23,  19,  22,  19,  20,  19,  23,  19,  19,
-        19,  23,  23,  18,  20,  22,  19,  19,  19,  19,  20,  18,  19,
-        19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,  19,
-        19,  19,  19,  20,  18,  19,  20,  22,  19,  19,  19,  19,  19,
-        19,  23,  19,  19,  19,  19,  19,  20,  22,  19,  19,  19,  20,
-        22,  19,  19, 277,  23,  18,  19,  19,  19,  19,  19,  23,  19,
-        23,  18,  19,  19,  20,  22,  19,  19,  19,  19,  19,  19,  19,
-        23,  19,  23,  22,  19,  19,  20,  22,  20,  23,  18,  23,  20,
-        18,  20,  18,  19,  23,  19,  19,  19,  19,  19,  19,  19,  19,
-        19,  19,  19,  23,  22,  19,  20,  19,  19,  19,  19,  19,  19,
-
+Since the timer frequency is 50.25MHz, the typical time between reads is 19/50.25MHz = 0.378us, or approximatelly
+2.6M reads per second.
 
 Occasionaly we have a few hundreds or even a couple of thousands of timer clicks between reads, which is probably due to the the OS interrupts.
 
@@ -286,15 +281,12 @@ Conclusion, Takeaways, Future Work and Follow-ups
 1. I really loved working with IceStick and APIO/IceStorm tools. It is a great platform for learning and prototyping. 
    Hovewer, the number of exposed pins is very limited, and we hit the limit here
 
-2. Looks like the approach we used here allows us to connect around 20 microphones safely, and we probably need 
+2. Synchronization of the signals coming from outside of device clock domain is super-importand. I had frequent glitches 
+   without it: 
+
+3. Looks like the approach we used here allows us to connect around 50 microphones safely, and we probably need 
    to push the speed further to connect more microphones. The bottleneck seems to be on the SBC side, I need to 
    understand if it is possible to squeeze more speed out of the SBC. Another option would be using more powerful 
    FPGA with big RAM attached to it and moving some of the DSP processing to the FPGA.
-
-3. I need to understand the "slow start" effect: why the instant transfer speed is 1.2 MSps/s initially and after
-   reading 60K-65K samples it gets more then twice faster, 2.6 MSps/s. Can we control it? If we acheive stable 
-   2.6 MSps/s transfer rate, we can capture the data from 54 microphones at full 48Ksps rate. My current hypothesis 
-   is that it is related DVFS (Dynamic Voltage and Frequence Scaling). I am going to investigate it and update this post
-   according to the results.
 
 4. The next step would be to connect a bunch of I2S microphones to the FPGA and transfer real audio data to the SBC.
