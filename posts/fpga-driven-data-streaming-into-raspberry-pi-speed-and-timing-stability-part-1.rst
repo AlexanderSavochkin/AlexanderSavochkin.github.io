@@ -291,7 +291,7 @@ Conclusion, Takeaways, Future Work and Follow-ups
 1. I really loved working with IceStick and APIO/IceStorm tools. It is a great platform for learning and prototyping. 
    Hovewer, the number of exposed pins is very limited, and we hit the limit here
 
-2. Synchronization of the signals coming from outside of device clock domain is super-importand. I had frequent glitches 
+2. Synchronization of the signals coming from outside of device clock domain is super-important. I had frequent glitches 
    without it: 
 
 3. Looks like the approach we used here allows us to connect around 50 microphones safely, and we probably need 
