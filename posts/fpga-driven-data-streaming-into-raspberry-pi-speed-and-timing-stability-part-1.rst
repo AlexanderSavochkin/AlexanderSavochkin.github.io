@@ -261,17 +261,27 @@ Since the timer frequency is 50.25MHz, the typical time between reads is 19/50.2
 
 Occasionaly we have a few hundreds or even a couple of thousands of timer clicks between reads, which is probably due to the the OS interrupts.
 
-Here is the histogram of the time intervals between reads for 500M cycles:
+Here is the histogram which illustrates distribution of pollng cycles for 500M cycles:
 
 .. image :: /images/FPGA-timing-hist1.png
    :height: 1350
    :width: 1350
    :scale: 50
 
+Overwhelming majority of the polling cycles are around 400 ns, but when we zoom out the time axis, we see two more peaks:
+around 5500 ns and 9500 ns
+
 .. image :: /images/FPGA-timing-hist2.png
    :height: 1350
    :width: 1350
    :scale: 50
+
+I think the peaks at 5500 ns and 9500 ns are due to the OS interrupts.
+
+That means if we provide the buffer for storing around 12-15 micoseconds of the data on the exteran device side, we can, more or less
+handle the stream despite of the occasional polling delays. In microphone array application, for 100 microphones with 24-bit resolution,
+at 48KHz sampling rate, we need to store 100*24*48000 = 115.2M bits per second, or 14.4M bytes per second. So, for 15 microseconds delay
+we need to provide the buffer of approximatelly 216 bytes, which is more than feasible.
 
 
 =========================================================
