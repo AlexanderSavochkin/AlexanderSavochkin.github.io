@@ -191,7 +191,6 @@ of the exchagne diagram) can be described by the following verilog code:
     
         reg data_req_1;
         reg data_req_2;
-        reg data_req_3;
     
         reg [23:0] timer_count;
     
