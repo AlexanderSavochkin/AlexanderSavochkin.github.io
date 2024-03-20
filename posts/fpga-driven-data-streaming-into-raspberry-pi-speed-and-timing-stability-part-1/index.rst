@@ -184,47 +184,53 @@ of the exchagne diagram) can be described by the following verilog code:
     module transfer_msr(
         input ref_clk,  //ICEStick 12MHz clock
         input rst,
-         input data_req,
-         output reg data_rdy,
-         output reg [23:0] msr_data
+        input data_req,
+        output reg data_rdy,
+        output reg [23:0] msr_data
     );
-         reg data_req_1; 
-         reg data_req_2;
-         reg data_req_3;
-         reg [23:0] timer_count;
-
-         //...[SKIPPED PLL declaration]...
-
-         always @(posedge clk) begin
-            if (rst) begin  //Reset the device on HIGH level of the reset signal
+    
+        reg data_req_1;
+        reg data_req_2;
+        reg data_req_3;
+    
+        reg [23:0] timer_count;
+    
+    
+        wire clk;
+    
+        //...[SKIPPED PLL declaration]...
+    
+        always @(posedge clk) begin
+            if (rst) begin
                 msr_data <= 24'b0;
                 timer_count <= 24'b0;
-                prev_data_req <= 1'b0;
+                data_req_1 <= 1'b0;
+                data_req_2 <= 1'b0;
             end else 
-            begin 
-                if (data_req & ~prev_data_req) begin
-                    //Data request detected, send the timer value to msr_data output
+            begin
+                // Since the data_req comes from the external source, we need 
+                // to synchronize it See Harris, Harris, chapters 3.5.5, 4.4.4
+                // or https://en.wikipedia.org/wiki/Incremental_encoder#Clock_synchronization
+                if (data_req_1 & ~data_req_2) begin
                     msr_data <= timer_count;
-                end else if (data_req & prev_data_req) begin
-                    // Next cycle after the data request, set the data ready signal
-                    // We set the output on the previous cycle
+                end else if (data_req_1 & data_req_2) begin
                     data_rdy <= 1'b1;
-                end else if (~data_req) begin
-                    //Data request cleared, clear the data ready signal
+                end else if (~data_req_1) begin
                     data_rdy <= 1'b0;
                 end
-
+    
                 if (timer_count == 24'hFFFFFF) begin
-                    //Roll over the timer
                     timer_count <= 24'b0;
                 end else begin
-                    //Increment the timer
                     timer_count <= timer_count + 1;
                 end
-
-                prev_data_req <= data_req;
+    
+                data_req_1 <= data_req;
+                data_req_2 <= data_req_1;
+    
             end;
         end
+    
     endmodule
 
 I use 24-bit counter because I am having I2S INMP441 microphone array as a possible follow-up project.
@@ -282,6 +288,8 @@ That means if we provide the buffer for storing around 12-15 micoseconds of the 
 handle the stream despite of the occasional polling delays. In microphone array application, for 100 microphones with 24-bit resolution,
 at 48KHz sampling rate, we need to store 100*24*48000 = 115.2M bits per second, or 14.4M bytes per second. So, for 15 microseconds delay
 we need to provide the buffer of approximatelly 216 bytes, which is more than feasible.
+
+Verilog and C code is available in the `github repository <https://github.com/AlexanderSavochkin/RPiGPIOTransferMSR/>`_.
 
 
 =========================================================
