@@ -42,7 +42,7 @@
 'copy_assets:output\\assets\\css\\rst_base.css', (41472, 430)
 'copy_assets:output\\assets\\css\\bootstrap.min.css', (100864, 572)
 'create_bundles:output\\assets\\js\\all.js', (63488, 485)
-'sitemap:output\\sitemap.xml', (204288, 4568)
+'sitemap:output\\sitemap.xml', (204288, 4569)
 'render_taxonomies:output\\2023\\index.html', (146432, 3768)
 'render_posts:timeline_changes', (47616, 109)
 'render_galleries', (48128, 56)
