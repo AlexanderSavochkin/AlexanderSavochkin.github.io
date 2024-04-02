@@ -1,4 +1,4 @@
-.. title: FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability. Part 1
+.. title: FPGA-Driven data streaming into Raspberry Pi through GPIO: Speed and timing stability.
 .. slug: fpga-driven-data-streaming-into-raspberry-pi-speed-and-timing-stability-part-1
 .. date: 2024-03-04 17:07:21 UTC-08:00
 .. tags: FPGA, Verilog 
@@ -281,12 +281,12 @@ around 5500 ns and 9500 ns
    :width: 1350
    :scale: 50
 
-I think the peaks at 5500 ns and 9500 ns are due to the OS interrupts.
+I think the peaks at 5500 ns and 9500 ns are due to the OS interrupts. Note abrupt end of the histogram at ~18000 ns.
 
-That means if we provide the buffer for storing around 12-15 micoseconds of the data on the exteran device side, we can, more or less
+That means if we provide the buffer for storing around 18 micoseconds of the data on the FPGA device side, we can, more or less
 handle the stream despite of the occasional polling delays. In microphone array application, for 100 microphones with 24-bit resolution,
-at 48KHz sampling rate, we need to store 100*24*48000 = 115.2M bits per second, or 14.4M bytes per second. So, for 15 microseconds delay
-we need to provide the buffer of approximatelly 216 bytes, which is more than feasible.
+at 48KHz sampling rate, we need to store 100*24*48000 = 115.2M bits per second, or 14.4M bytes per second. So, for 18 microseconds delay
+we need to provide the buffer of approximatelly 260 bytes, which is more than feasible.
 
 Verilog and C code is available in the `github repository <https://github.com/AlexanderSavochkin/RPiGPIOTransferMSR/>`_.
 
