@@ -11,17 +11,20 @@
 Introduction
 =======================
 
-This post continues the series of posts describing experiments with using FPGA as a high speed (millions of samples per second)
-data capturing device and continues my previous post, where we defined the exchange protocol and measured timing. As I 
-concluded in that post, we need to have a buffer on the capturing device side which can hold the samples is the computer 
-reading the data temporary stops polling the data due to handling OS interrupts.
+This post continues the series of posts describing experiments with using an FPGA as a high-speed
+(millions of samples per second) data capturing device. It continues from my previous post, where 
+we defined the exchange protocol and measured timing. As I concluded in that post, we need to have 
+a buffer on the capturing device side, which can hold the samples if the computer temporarily stops 
+polling the data due to handling OS interrupts.
 
-Conveniently, FPGAs typically have RAM on the chip which can be used for builing such a buffer, and we will explore how 
-to use it in this post. We will create a simple data generator which will simulate the data and write it into the buffer,
-and then read the data from the buffer and transfer it into the parallel bus.
+Conveniently, FPGAs typically have RAM on the chip, which can be used for building such a buffer, 
+and we will explore how to use it in this post. We will create a simple data generator that will 
+simulate the data and write it into the buffer, and then read the data from the buffer and transfer 
+it to the parallel bus.
 
-This test program partially implements my project of building a microphone array with multiple INMP441 microphones 
-connected to the FPGA, which I briefly describe in the next section.
+This test program partially implements my project of building a microphone array with multiple INMP441 
+microphones connected to the FPGA, which I will briefly describe in the next section.
+
 
 ==========================
 High level design overview
@@ -35,40 +38,45 @@ Here is the diagram of the digital device I am having in mind
    :scale: 50
 
 
-According to out estimation we need buffer of size > 260 samples, we will implement 512 samples buffer which
-will have and extra space which helps to cover cases when two interrupts comming almost simultaneously.
+According to our estimation, we need a buffer of size > 260 samples. We will implement a 512-sample buffer, 
+which will have extra space to cover cases when two interrupts come almost simultaneously.
 
-The iCE40HX1K chip has 16 blocks of RAM 4096 bits (512 bytes) each.
-Each block can be configured for storing 256 x 16-bit, 512 x 8-bit bytes, 1024 x 4-bit or 2048 x 2-bit memory cell.
-Since I am aiming to capture 24-bit samples from multiple INMP441 microphones, my samples are 24-bit wide, so in 
-order to utilize the memory efficiently I decided to use 3 blocks configured as 512x8:  1st block will keep bits 
-0..7, 2nd block will keep bits 8..15 and 3rd block will keep bits 16..23.
+The iCE40HX1K chip has 16 blocks of RAM, each with 4096 bits (512 bytes). Each block can be configured 
+for storing 256 x 16-bit, 512 x 8-bit bytes, 1024 x 4-bit, or 2048 x 2-bit memory cells. Since I am 
+aiming to capture 24-bit samples from multiple INMP441 microphones, my samples are 24-bit wide. To 
+utilize the memory efficiently, I decided to use 3 blocks configured as 512x8: the 1st block will 
+keep bits 0-7, the 2nd block will keep bits 8-15, and the 3rd block will keep bits 16-23.
 
-We will design the multiple I2S capturing part in the next posts, today we will replace it with a simulated data 
-which will be written into the circular buffer and focus on data reading and transferring into the parallel bus.
+We will design the multiple I2S capturing part in the next posts. Today, we will replace it with simulated 
+data, which will be written into the circular buffer, and focus on data reading and transferring to the parallel bus.
 
-The exchange protocol is the same is in the time measurment setup described in the previous post: the "device" 
-(FPGA) waits for the rising edge of the "Data Req" (data request) line and sets its 21-bit data output, but this 
-time it reads it from the memory instead of using timer value. Then the "device" sets the "Data Rdy" (data ready) 
-line to HIGH. The polling program detects the change in the "Data Rdy"  line, reads and records the 21-bit data value from
-the parallel bus, and then sets "Data Req" to low on the SBC. This signals to the device that the SBC has successfully 
-read the data, prompting it to set "Data Rdy" to low. The polling program detects the falling edge of the "Data Rdy"
-line and proceeds to the next cycle iteration. 
+The exchange protocol is the same as in the time measurement setup described in the previous post: 
+the "device" (FPGA) waits for the rising edge of the "Data Req" (data request) line and sets its 
+21-bit data output, but this time it reads it from the memory instead of using a timer value. 
+Then the "device" sets the "Data Rdy" (data ready) line to HIGH. The polling program detects the
+change in the "Data Rdy" line, reads and records the 21-bit data value from the parallel bus, and then 
+sets "Data Req" to low on the SBC. This signals to the device that the SBC has successfully read the data, 
+prompting it to set "Data Rdy" to low. The polling program detects the falling edge of the "Data Rdy" 
+line and proceeds to the next cycle iteration.
 
-Previously we used the timer value as the data, it is pretty much the same in this design, but the timer value is written
-the FIFO buffer and the reading part of the system gets in from the reading side of the FIFO and sends to thr parallel bus.
+Previously, we used the timer value as the data. It is pretty much the same in this design, but the timer 
+value is written to the FIFO buffer, and the reading part of the system gets it from the reading side of 
+the FIFO and sends it to the parallel bus.
 
-The timer is 8-bit wide now, we repeat it 3 times to get 24-bit value, so the data should be least significant 21 bytes
-of the 24-bit value <Timer[7:0], Timer[7:0], Timer[7:0]>. As a quick reminder we are using 21-bit data value because
-we run out of pins on iCEstick board.
+The timer is now 8-bit wide. We repeat it 3 times to get a 24-bit value, so the data should be the least 
+significant 21 bytes of the 24-bit value {Timer[7:0], Timer[7:0], Timer[7:0]}. As a quick reminder, we are 
+using a 21-bit data value because we ran out of pins on the iCEstick board.
+
 
 ======================
 Verilog implementation
 ======================
 
-I think there are modules similar to PLL (see the previous post) which can be used for defining the RAM block in Verilog.
+I think there are modules similar to PLL (see the previous post) which can be used for defining the 
+RAM block in Verilog. 
 `The Memory Usage Guide for iCE40 Devices <https://www.latticesemi.com/-/media/LatticeSemi/Documents/ApplicationNotes/MO/MemoryUsageGuideforiCE40Devices.ashx?document_id=47775>`_
-mentions the `SB_RAM512x8`, `SB_RAM1024x4` modules, but I think they are Lattice/iCE40-specific and I am not sure how to use them with apio.
+mentions the `SB_RAM512x8`, `SB_RAM1024x4` modules, but I think they are Lattice/iCE40-specific and I am not 
+sure how to use them with apio.
 
 There is also another, more portable way to infer RAM blocks in Verilog, which is supported by most of the FPGA synthesis tools.
 We will follow this way in our design. The following code snippet shows how to define a 512x8 memory block in Verilog
@@ -207,11 +215,12 @@ The simulation part is pretty simple, we generate the data and write it into eac
     end
 
 
-The reading speed should be slightly faster then writing speed in average. If the reader is interrupted for a brief
+The average reading speed should be faster then writing speed. If the reader is interrupted for a brief
 period of time, the data will be buffered in the RAM. When the reader returns to polling the data, it will catch up
 with the writer. If the reader reaches the writer address, it will stop reading the data until the new data arrives.
 
-I implemented the reader in a separate model since want to reuse it in different designs. Here is the verilog code for the reading part:
+I implemented the reader in a separate model since want to reuse it in different designs. 
+Here is the verilog code for the reading part:
 
 .. code-block:: verilog
 
@@ -399,6 +408,13 @@ Conclusion
 We learned how to use RAM in iCE40 FPGA and implemented FIFO buffer. In the next article, we will learn how to read the data from multiple I2S microphones 
 and push it into the FIFO buffer. Stay tuned!
 
+===========
+References
+===========
+
+* The source code for this article is available at `Github <https://github.com/AlexanderSavochkin/RPiGPIOTBuffering>`_
+
+* `The Memory Usage Guide for iCE40 Devices <https://www.latticesemi.com/-/media/LatticeSemi/Documents/ApplicationNotes/MO/MemoryUsageGuideforiCE40Devices.ashx?document_id=47775>`_
 
 
 
