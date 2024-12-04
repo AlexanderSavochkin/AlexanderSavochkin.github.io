@@ -5,7 +5,7 @@ STOP_RENDERING = runtime.STOP_RENDERING
 __M_dict_builtin = dict
 __M_locals_builtin = locals
 _magic_number = 10
-_modified_time = 1712119046.0931754
+_modified_time = 1733345318.7107337
 _enable_loop = True
 _template_filename = 'C:/Projects/Blog/Nikola/nikola/Lib/site-packages/nikola/data/themes/bootblog4/templates/base_helper.tmpl'
 _template_uri = 'base_helper.tmpl'
@@ -48,28 +48,28 @@ def render_html_headstart(context):
     try:
         _import_ns = {}
         _mako_get_namespace(context, 'feeds_translations')._populate(_import_ns, ['*'])
-        prevlink = _import_ns.get('prevlink', context.get('prevlink', UNDEFINED))
-        url_type = _import_ns.get('url_type', context.get('url_type', UNDEFINED))
-        title = _import_ns.get('title', context.get('title', UNDEFINED))
-        theme_color = _import_ns.get('theme_color', context.get('theme_color', UNDEFINED))
-        is_rtl = _import_ns.get('is_rtl', context.get('is_rtl', UNDEFINED))
-        url_replacer = _import_ns.get('url_replacer', context.get('url_replacer', UNDEFINED))
-        comment_system = _import_ns.get('comment_system', context.get('comment_system', UNDEFINED))
-        permalink = _import_ns.get('permalink', context.get('permalink', UNDEFINED))
-        description = _import_ns.get('description', context.get('description', UNDEFINED))
-        meta_generator_tag = _import_ns.get('meta_generator_tag', context.get('meta_generator_tag', UNDEFINED))
         use_cdn = _import_ns.get('use_cdn', context.get('use_cdn', UNDEFINED))
-        comment_system_id = _import_ns.get('comment_system_id', context.get('comment_system_id', UNDEFINED))
-        favicons = _import_ns.get('favicons', context.get('favicons', UNDEFINED))
+        comment_system = _import_ns.get('comment_system', context.get('comment_system', UNDEFINED))
         extra_head_data = _import_ns.get('extra_head_data', context.get('extra_head_data', UNDEFINED))
-        def html_feedlinks():
-            return render_html_feedlinks(context)
         def html_stylesheets():
             return render_html_stylesheets(context)
-        nextlink = _import_ns.get('nextlink', context.get('nextlink', UNDEFINED))
         lang = _import_ns.get('lang', context.get('lang', UNDEFINED))
-        abs_link = _import_ns.get('abs_link', context.get('abs_link', UNDEFINED))
+        meta_generator_tag = _import_ns.get('meta_generator_tag', context.get('meta_generator_tag', UNDEFINED))
+        theme_color = _import_ns.get('theme_color', context.get('theme_color', UNDEFINED))
+        url_type = _import_ns.get('url_type', context.get('url_type', UNDEFINED))
+        favicons = _import_ns.get('favicons', context.get('favicons', UNDEFINED))
+        prevlink = _import_ns.get('prevlink', context.get('prevlink', UNDEFINED))
+        url_replacer = _import_ns.get('url_replacer', context.get('url_replacer', UNDEFINED))
         blog_title = _import_ns.get('blog_title', context.get('blog_title', UNDEFINED))
+        title = _import_ns.get('title', context.get('title', UNDEFINED))
+        nextlink = _import_ns.get('nextlink', context.get('nextlink', UNDEFINED))
+        abs_link = _import_ns.get('abs_link', context.get('abs_link', UNDEFINED))
+        def html_feedlinks():
+            return render_html_feedlinks(context)
+        permalink = _import_ns.get('permalink', context.get('permalink', UNDEFINED))
+        is_rtl = _import_ns.get('is_rtl', context.get('is_rtl', UNDEFINED))
+        comment_system_id = _import_ns.get('comment_system_id', context.get('comment_system_id', UNDEFINED))
+        description = _import_ns.get('description', context.get('description', UNDEFINED))
         __M_writer = context.writer()
         __M_writer('\n<!DOCTYPE html>\n<html\n')
         __M_writer("prefix='")
@@ -152,12 +152,12 @@ def render_late_load_js(context):
     try:
         _import_ns = {}
         _mako_get_namespace(context, 'feeds_translations')._populate(_import_ns, ['*'])
-        luxon_locales = _import_ns.get('luxon_locales', context.get('luxon_locales', UNDEFINED))
         use_cdn = _import_ns.get('use_cdn', context.get('use_cdn', UNDEFINED))
         lang = _import_ns.get('lang', context.get('lang', UNDEFINED))
-        date_fanciness = _import_ns.get('date_fanciness', context.get('date_fanciness', UNDEFINED))
-        social_buttons_code = _import_ns.get('social_buttons_code', context.get('social_buttons_code', UNDEFINED))
+        luxon_locales = _import_ns.get('luxon_locales', context.get('luxon_locales', UNDEFINED))
         use_bundles = _import_ns.get('use_bundles', context.get('use_bundles', UNDEFINED))
+        social_buttons_code = _import_ns.get('social_buttons_code', context.get('social_buttons_code', UNDEFINED))
+        date_fanciness = _import_ns.get('date_fanciness', context.get('date_fanciness', UNDEFINED))
         __M_writer = context.writer()
         __M_writer('\n')
         if use_cdn:
@@ -194,8 +194,8 @@ def render_html_stylesheets(context):
         _import_ns = {}
         _mako_get_namespace(context, 'feeds_translations')._populate(_import_ns, ['*'])
         has_custom_css = _import_ns.get('has_custom_css', context.get('has_custom_css', UNDEFINED))
-        use_cdn = _import_ns.get('use_cdn', context.get('use_cdn', UNDEFINED))
         needs_ipython_css = _import_ns.get('needs_ipython_css', context.get('needs_ipython_css', UNDEFINED))
+        use_cdn = _import_ns.get('use_cdn', context.get('use_cdn', UNDEFINED))
         use_bundles = _import_ns.get('use_bundles', context.get('use_bundles', UNDEFINED))
         __M_writer = context.writer()
         __M_writer('\n')
@@ -241,12 +241,12 @@ def render_html_navigation_links_entries(context,navigation_links_source):
     try:
         _import_ns = {}
         _mako_get_namespace(context, 'feeds_translations')._populate(_import_ns, ['*'])
-        isinstance = _import_ns.get('isinstance', context.get('isinstance', UNDEFINED))
+        messages = _import_ns.get('messages', context.get('messages', UNDEFINED))
         tuple = _import_ns.get('tuple', context.get('tuple', UNDEFINED))
         lang = _import_ns.get('lang', context.get('lang', UNDEFINED))
-        messages = _import_ns.get('messages', context.get('messages', UNDEFINED))
-        permalink = _import_ns.get('permalink', context.get('permalink', UNDEFINED))
         rel_link = _import_ns.get('rel_link', context.get('rel_link', UNDEFINED))
+        permalink = _import_ns.get('permalink', context.get('permalink', UNDEFINED))
+        isinstance = _import_ns.get('isinstance', context.get('isinstance', UNDEFINED))
         __M_writer = context.writer()
         __M_writer('\n')
         for url, text in navigation_links_source[lang]:
@@ -310,11 +310,11 @@ def render_html_translations(context):
     try:
         _import_ns = {}
         _mako_get_namespace(context, 'feeds_translations')._populate(_import_ns, ['*'])
-        translations = _import_ns.get('translations', context.get('translations', UNDEFINED))
-        _link = _import_ns.get('_link', context.get('_link', UNDEFINED))
-        lang = _import_ns.get('lang', context.get('lang', UNDEFINED))
-        sorted = _import_ns.get('sorted', context.get('sorted', UNDEFINED))
         messages = _import_ns.get('messages', context.get('messages', UNDEFINED))
+        translations = _import_ns.get('translations', context.get('translations', UNDEFINED))
+        sorted = _import_ns.get('sorted', context.get('sorted', UNDEFINED))
+        lang = _import_ns.get('lang', context.get('lang', UNDEFINED))
+        _link = _import_ns.get('_link', context.get('_link', UNDEFINED))
         __M_writer = context.writer()
         __M_writer('\n')
         for langname in sorted(translations):
